@@ -91,7 +91,15 @@ if($ENV{ROS_VERSION} STREQUAL "1")
   set(CMAKE_CXX_EXTENSIONS OFF)
 
   ## make sure the livox_lidar_sdk_static library is installed
-  find_library(LIVOX_LIDAR_SDK_LIBRARY  liblivox_lidar_sdk_static.a    /usr/local/lib)
+  # Use prebuild livox sdk
+  if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+    set(LIVOX_LIDAR_SDK_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/livox_sdk/lib/x86_64/liblivox_lidar_sdk_static.a)
+  else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_PROCESSOR}")
+  endif()
+
+  ## livox sdk include dir
+  set(LIVOX_LIDAR_SDK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/livox_sdk/include)
 
   ## PCL library
   link_directories(${PCL_LIBRARY_DIRS})
@@ -147,6 +155,7 @@ if($ENV{ROS_VERSION} STREQUAL "1")
   target_include_directories(${PROJECT_NAME}_node
     PUBLIC
     ${catkin_INCLUDE_DIRS}
+    ${LIVOX_LIDAR_SDK_INCLUDE_DIR}
     ${PCL_INCLUDE_DIRS}
     ${APR_INCLUDE_DIRS}
     3rdparty
@@ -245,13 +254,15 @@ else($ENV{ROS_VERSION} STREQUAL "2")
     LIBRARY_NAME ${PROJECT_NAME}
   )
 
-  ## make sure the livox_lidar_sdk_shared library is installed
-  find_library(LIVOX_LIDAR_SDK_LIBRARY liblivox_lidar_sdk_shared.so /usr/local/lib REQUIRED)
+  # Use prebuild livox sdk
+  if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+    set(LIVOX_LIDAR_SDK_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/livox_sdk/lib/x86_64/liblivox_lidar_sdk_static.a)
+  else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_PROCESSOR}")
+  endif()
 
-  ##
-  find_path(LIVOX_LIDAR_SDK_INCLUDE_DIR
-    NAMES "livox_lidar_api.h" "livox_lidar_def.h"
-    REQUIRED)
+  ## livox sdk include dir
+  set(LIVOX_LIDAR_SDK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/livox_sdk/include)
 
   ## PCL library
   link_directories(${PCL_LIBRARY_DIRS})

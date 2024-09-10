@@ -41,6 +41,7 @@ Desktop-Full installation is recommend.
 ### 2.1 Clone Livox ROS Driver 2 source code:
 
 ```shell
+cd <ros_ws>/src
 git clone https://github.com/Livox-SDK/livox_ros_driver2.git ws_livox/src/livox_ros_driver2
 ```
 
@@ -56,8 +57,18 @@ git clone https://github.com/Livox-SDK/livox_ros_driver2.git ws_livox/src/livox_
 
 ### 2.3 Build the Livox ROS Driver 2:
 
-```bash
-rosdep install --from-paths src --ignore-src -y
+
+#### For ROS1
+
+```shell
+cd <ros_ws>
+catkin_make # or you can use `catkin build`
+```
+
+#### For ROS2
+
+```shell
+cd <ros_ws>
 colcon build --symlink-install
 ```
 
@@ -66,7 +77,8 @@ colcon build --symlink-install
 #### For ROS:
 
 ```shell
-source ../../devel/setup.sh
+cd <ros_ws>
+source ./devel/setup.sh
 roslaunch livox_ros_driver2 [launch file]
 ```
 
@@ -83,7 +95,8 @@ roslaunch livox_ros_driver2 rviz_HAP.launch
 
 #### For ROS2:
 ```shell
-source ../../install/setup.sh
+cd <ros_ws>
+source ./install/setup.sh
 ros2 launch livox_ros_driver2 [launch file]
 ```
 
