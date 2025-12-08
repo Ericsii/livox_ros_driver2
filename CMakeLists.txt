@@ -191,6 +191,10 @@ else($ENV{ROS_VERSION} STREQUAL "2")
   cmake_minimum_required(VERSION 3.14)
   project(livox_ros_driver2)
 
+  if(POLICY CMP0144)
+    cmake_policy(SET CMP0144 NEW)
+  endif()
+
   # Default to C99
   if(NOT CMAKE_C_STANDARD)
     set(CMAKE_C_STANDARD 99)
