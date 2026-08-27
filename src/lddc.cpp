@@ -30,6 +30,7 @@
 #include <iostream>
 #include <iomanip>
 #include <math.h>
+#include <memory>
 #include <stdint.h>
 
 #include "include/ros_headers.h"
@@ -210,7 +211,7 @@ void Lddc::PublishPointcloud2(LidarDataQueue *queue, uint8_t index) {
     PointCloud2 cloud;
     uint64_t timestamp = 0;
     InitPointcloud2Msg(pkg, cloud, timestamp);
-    PublishPointcloud2Data(index, timestamp, cloud);
+    PublishPointcloud2Data(index, timestamp, std::move(cloud));
   }
 }
 
@@ -332,7 +333,7 @@ void Lddc::InitPointcloud2Msg(const StoragePacket& pkg, PointCloud2& cloud, uint
   memcpy(cloud.data.data(), points.data(), pkg.points_num * sizeof(LivoxPointXyzrtlt));
 }
 
-void Lddc::PublishPointcloud2Data(const uint8_t index, const uint64_t timestamp, const PointCloud2& cloud) {
+void Lddc::PublishPointcloud2Data(const uint8_t index, const uint64_t timestamp, PointCloud2 cloud) {
 #ifdef BUILDING_ROS1
   PublisherPtr publisher_ptr = Lddc::GetCurrentPublisher(index);
 #elif defined BUILDING_ROS2
@@ -341,7 +342,11 @@ void Lddc::PublishPointcloud2Data(const uint8_t index, const uint64_t timestamp,
 #endif
 
   if (kOutputToRos == output_type_) {
+#ifdef BUILDING_ROS2
+    publisher_ptr->publish(std::make_unique<PointCloud2>(std::move(cloud)));
+#else
     publisher_ptr->publish(cloud);
+#endif
   } else {
 #ifdef BUILDING_ROS1
     if (bag_ && enable_lidar_bag_) {
@@ -478,7 +483,7 @@ void Lddc::PublishPclData(const uint8_t index, const uint64_t timestamp, const P
 }
 
 void Lddc::InitImuMsg(const ImuData& imu_data, ImuMsg& imu_msg, uint64_t& timestamp) {
-  imu_msg.header.frame_id = "livox_frame";
+  imu_msg.header.frame_id = frame_id_;
 
   timestamp = imu_data.time_stamp;
 #ifdef BUILDING_ROS1
